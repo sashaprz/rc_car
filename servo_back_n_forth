@@ -1,0 +1,24 @@
+#include <ESP32Servo.h> // Include the Servo library
+
+Servo myServo; // Create a Servo object
+
+void setup() {
+Serial.begin(115200); // Start serial communication at 115200 baud
+pinMode(5, OUTPUT);
+myServo.attach(18); // Attach the servo to pin 9 (change to your desired pin)
+//myServo.write(90); // Initialize servo to the center position (90 degrees)
+Serial.println("Servo initialized. Send 'l' to turn left or 'r' to turn right.");
+}
+
+void loop() {
+digitalWrite(5, HIGH);
+myServo.write(80);
+delay(1000);
+
+digitalWrite(5, LOW);
+myServo.write(90);
+delay(1000);
+
+myServo.write(103);
+delay(1000);
+}
