@@ -1,0 +1,42 @@
+#include <ESP32Servo.h> // Include the Servo library
+
+Servo myServo; // Create a Servo object
+const int ledPin = 5;
+const int servoPin = 18;
+
+void setup() {
+  Serial.begin(115200); // Start serial communication at 115200 baud
+  pinMode(ledPin, OUTPUT);
+  myServo.attach(servoPin); // Attach the servo to pin 18
+  myServo.write(90); // Initialize servo to stop position
+  Serial.println("Servo initialized. Send 'l' to move left, 'r' to move right.");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char input = Serial.read();
+    
+    switch(input) {
+      case 'l':
+      case 'L':
+        digitalWrite(ledPin, HIGH);
+        myServo.write(107); // Tiny counterclockwise movement
+        delay(100);         // Short delay for movement
+        myServo.write(95);  // Stop after movement
+        digitalWrite(ledPin, LOW);
+        Serial.println("Moved left and stopped");
+        break;
+      case 'r':
+      case 'R':
+        digitalWrite(ledPin, HIGH);
+        myServo.write(80);  // Tiny clockwise movement
+        delay(100);         // Short delay for movement
+        myServo.write(95);  // Stop after movement
+        digitalWrite(ledPin, LOW);
+        Serial.println("Moved right and stopped");
+        break;
+      default:
+        Serial.println("Invalid input. Use 'l' for left or 'r' for right.");
+    }
+  }
+}
