@@ -1,0 +1,64 @@
+#include <ESP32Servo.h>
+
+Servo myServo;
+const int ledPin = 5;
+const int servoPin = 18;
+
+int currentPosition = 90; // Start at center
+const int leftLimit = 0;  // Left barrier
+const int rightLimit = 180; // Right barrier
+const int stepSize = 10;  // Amount to move each command
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  myServo.attach(servoPin);
+  myServo.write(90); // Initialize to stop
+  Serial.println("Servo initialized. Send 'l' to turn left, 'r' to turn right, or 's' to stop.");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char input = Serial.read();
+    
+    switch(input) {
+      case 'l':
+      case 'L':
+        if (currentPosition > leftLimit) {
+          currentPosition -= stepSize;
+          digitalWrite(ledPin, HIGH);
+          myServo.write(80); // Turn left
+          Serial.println("Turning left");
+          delay(500); // Turn for half a second
+          myServo.write(90); // Stop
+        } else {
+          Serial.println("At left limit");
+        }
+        break;
+      case 'r':
+      case 'R':
+        if (currentPosition < rightLimit) {
+          currentPosition += stepSize;
+          digitalWrite(ledPin, HIGH);
+          myServo.write(100); // Turn right
+          Serial.println("Turning right");
+          delay(500); // Turn for half a second
+          myServo.write(90); // Stop
+        } else {
+          Serial.println("At right limit");
+        }
+        break;
+      case 's':
+      case 'S':
+        digitalWrite(ledPin, LOW);
+        myServo.write(90); // Stop
+        Serial.println("Stopping");
+        break;
+      default:
+        Serial.println("Invalid input. Use 'l' for left, 'r' for right, or 's' to stop.");
+    }
+    
+    Serial.print("Current position: ");
+    Serial.println(currentPosition);
+  }
+}
