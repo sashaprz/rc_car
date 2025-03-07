@@ -1,0 +1,61 @@
+#include <ESP32Servo.h>
+
+Servo myServo;
+const int ledPin = 5;
+const int servoPin = 18;
+const int STOP_POS = 95; // Your calibrated stop position
+
+// Position tracking and limit variables
+int currentPosition = 0;      // Center position (neutral)
+const int minPosition = -5;  // Minimum allowed position (left limit)
+const int maxPosition = 5;   // Maximum allowed position (right limit)
+const int stepSize = 1;       // Position change per movement
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  myServo.attach(servoPin);
+  myServo.write(STOP_POS);
+  Serial.println("Servo initialized. Send 'l' to move left, 'r' to move right.");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char input = Serial.read();
+    
+    switch(input) {
+      case 'l':
+      case 'L':
+        if (currentPosition > minPosition) {
+          moveServo(-stepSize);
+        } else {
+          Serial.println("Left limit reached!");
+        }
+        break;
+        
+      case 'r':
+      case 'R':
+        if (currentPosition < maxPosition) {
+          moveServo(stepSize);
+        } else {
+          Serial.println("Right limit reached!");
+        }
+        break;
+        
+      default:
+        Serial.println("Invalid input. Use 'l' for left or 'r' for right.");
+    }
+  }
+}
+
+void moveServo(int direction) {
+  digitalWrite(ledPin, HIGH);
+  myServo.write(direction > 0 ? 80 : 107); // Movement command
+  delay(100);                              // Movement duration
+  myServo.write(STOP_POS);                 // Stop servo
+  digitalWrite(ledPin, LOW);
+  
+  currentPosition += direction;
+  Serial.print("Position: ");
+  Serial.println(currentPosition);
+}
