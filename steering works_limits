@@ -7,8 +7,8 @@ const int STOP_POS = 95; // Your calibrated stop position
 
 // Position tracking and limit variables
 int currentPosition = 0;      // Center position (neutral)
-const int minPosition = -5;  // Minimum allowed position (left limit)
-const int maxPosition = 5;   // Maximum allowed position (right limit)
+const int minPosition = 0;  // Minimum allowed position (left limit)
+const int maxPosition = 8;   // Maximum allowed position (right limit)
 const int stepSize = 1;       // Position change per movement
 
 void setup() {
