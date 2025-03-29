@@ -1,0 +1,66 @@
+#include <ESP32Servo.h>
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+
+Servo myServo;
+const int ledPin = 26;
+const int servoPin = 26;
+const int STOP_POS = 95; // Your calibrated stop position
+
+// Position tracking and limit variables
+int currentPosition = 0;      // Center position (neutral)
+const int minPosition = -4;  // Minimum allowed position (left limit)
+const int maxPosition = 4;   // Maximum allowed position (right limit)
+const int stepSize = 1;       // Position change per movement
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(servoPin, OUTPUT);
+  myServo.attach(servoPin);
+  digitalWrite(servoPin, LOW);
+  myServo.write(STOP_POS);
+  SerialBT.println("Servo initialized. Send 'l' to move left, 'r' to move right.");
+  SerialBT.begin("ESP32_Servo_Control"); // Set the name for your ESP32
+  SerialBT.println("Bluetooth initialized. Pair with 'ESP32_Servo_Control'.");
+}
+
+void loop() {
+  if (SerialBT.available() > 0) {
+    char input = SerialBT.read();
+    
+    switch(input) {
+      case 'l':
+      case 'L':
+        if (currentPosition > minPosition) {
+          moveServo(-stepSize);
+        } else {
+          SerialBT.println("Left limit reached!");
+        }
+        break;
+        
+      case 'r':
+      case 'R':
+        if (currentPosition < maxPosition) {
+          moveServo(stepSize);
+        } else {
+          SerialBT.println("Right limit reached!");
+        }
+        break;
+        
+      default:
+        SerialBT.println("Invalid input. Use 'l' for left or 'r' for right.");
+      }
+  }
+}
+
+void moveServo(int direction) {
+  digitalWrite(ledPin, HIGH);
+  myServo.write(direction > 0 ? 25 : 115); // Movement command
+  delay(200);                              // Movement duration
+  myServo.write(STOP_POS);                 // Stop servo
+  digitalWrite(ledPin, LOW);
+  
+  currentPosition += direction;
+  SerialBT.print("Position: ");
+  SerialBT.println(currentPosition);
+}
