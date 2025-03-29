@@ -1,0 +1,32 @@
+#include <ESP32Servo.h>
+
+const int high_left = 32;
+const int low_left = 33;//check these 
+const int high_right = 19;
+const int low_right = 21;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(21, OUTPUT);
+  pinMode(low_left, OUTPUT);
+  pinMode(high_right, OUTPUT);
+  pinMode(low_right, OUTPUT);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  digitalWrite(21, HIGH);
+  digitalWrite(19, HIGH);
+  digitalWrite(32, HIGH);
+  digitalWrite(33, HIGH);
+  delay(1000);
+  digitalWrite(21, LOW);
+  digitalWrite(19, LOW);
+  digitalWrite(32, LOW);
+  digitalWrite(33, LOW);
+  delay(1000);
+  printf("cycle complete\n");
+
+}
