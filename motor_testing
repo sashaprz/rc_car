@@ -1,0 +1,15 @@
+const int signalPin = 25;
+const int powerPin = 27;
+
+void setup() {
+  pinMode(signalPin, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(signalPin, HIGH);
+  digitalWrite(powerPin, HIGH);
+  delay(1000);
+  digitalWrite(signalPin, LOW);
+  digitalWrite(powerPin, HIGH);
+  delay(1000);
+}
