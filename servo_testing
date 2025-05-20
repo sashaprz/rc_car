@@ -1,17 +1,23 @@
-#include <Servo.h>
+#include <ESP32Servo.h>
 
-Servo myservo;      // Create a servo object
-int servoPin = 26;   // Attach your servo signal wire to pin 9
+Servo myservo;              // Create servo object
+int servoPin = 26;          // GPIO pin connected to servo signal wire
 
 void setup() {
-  myservo.attach(servoPin); // Attach the servo to the pin
+  ESP32PWM::allocateTimer(0);  // Allocate PWM timers (required for ESP32Servo)
+  myservo.setPeriodHertz(50);  // Standard servo frequency
+  myservo.attach(servoPin, 500, 2400); // Attach to pin, set min/max pulse (adjust if needed)
 }
 
 void loop() {
-  myservo.write(0);    // Move to 0 degrees
-  delay(1000);         // Wait 1 second
-  myservo.write(90);   // Move to 90 degrees
-  delay(1000);         // Wait 1 second
-  myservo.write(180);  // Move to 180 degrees
-  delay(1000);         // Wait 1 second
+  // Sweep from 0 to 180 degrees
+  for (int pos = 0; pos <= 180; pos++) {
+    myservo.write(pos);
+    delay(15);
+  }
+  // Sweep from 180 back to 0 degrees
+  for (int pos = 180; pos >= 0; pos--) {
+    myservo.write(pos);
+    delay(15);
+  }
 }
