@@ -1,12 +1,17 @@
-const int servoPin = 26;
+#include <Servo.h>
+
+Servo myservo;      // Create a servo object
+int servoPin = 26;   // Attach your servo signal wire to pin 9
 
 void setup() {
-  pinMode(servoPin, OUTPUT);
+  myservo.attach(servoPin); // Attach the servo to the pin
 }
 
 void loop() {
-  digitalWrite(servoPin, HIGH);
-  delay(500);
-  digitalWrite(servoPin, LOW);
-  delay(500);
+  myservo.write(0);    // Move to 0 degrees
+  delay(1000);         // Wait 1 second
+  myservo.write(90);   // Move to 90 degrees
+  delay(1000);         // Wait 1 second
+  myservo.write(180);  // Move to 180 degrees
+  delay(1000);         // Wait 1 second
 }
