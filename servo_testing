@@ -1,0 +1,12 @@
+const int servoPin = 26;
+
+void setup() {
+  pinMode(servoPin, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(servoPin, HIGH);
+  delay(500);
+  digitalWrite(servoPin, LOW);
+  delay(500);
+}
