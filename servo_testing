@@ -1,23 +1,78 @@
 #include <ESP32Servo.h>
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
 
-Servo myservo;              // Create servo object
-int servoPin = 26;          // GPIO pin connected to servo signal wire
+Servo myServo;
+const int motorPin = 13;
+const int steerPin = 26;
+
+// Servo position variables
+const int steps = 5;                   // Number of steps for full 180°
+const int minAngle = 0;
+const int maxAngle = 180;
+const int stepAngle = (maxAngle - minAngle) / steps; // 36°
+int currentStep = steps / 2;           // Start centered (step 2 of 0-5)
+int currentAngle = minAngle + currentStep * stepAngle;
 
 void setup() {
-  ESP32PWM::allocateTimer(0);  // Allocate PWM timers (required for ESP32Servo)
-  myservo.setPeriodHertz(50);  // Standard servo frequency
-  myservo.attach(servoPin, 500, 2400); // Attach to pin, set min/max pulse (adjust if needed)
+  Serial.begin(115200);
+  myServo.attach(steerPin, 500, 2400); // Attach servo with typical pulse range
+  pinMode(motorPin, OUTPUT);
+  myServo.write(currentAngle);          // Center servo
+
+  SerialBT.begin("ESP32_Servo_Control");
+  SerialBT.println("Servo initialized. Send 'l' to move left, 'r' to move right, 'w' for forward, and 's' for stop.");
 }
 
 void loop() {
-  // Sweep from 0 to 180 degrees
-  for (int pos = 0; pos <= 180; pos++) {
-    myservo.write(pos);
-    delay(15);
+  if (SerialBT.available() > 0) {
+    char input = SerialBT.read();
+    switch(input) {
+      case 'l':
+      case 'L':
+        if (currentStep > 0) {
+          currentStep--;
+          updateServo();
+        } else {
+          SerialBT.println("Left limit reached! Servo at 0 degrees.");
+        }
+        break;
+      case 'r':
+      case 'R':
+        if (currentStep < steps) {
+          currentStep++;
+          updateServo();
+        } else {
+          SerialBT.println("Right limit reached! Servo at 180 degrees.");
+        }
+        break;
+      case 'w':
+      case 'W':
+        turnMotorOn();
+        break;
+      case 's':
+      case 'S':
+        turnMotorOff();
+        break;
+      default:
+        SerialBT.println("Invalid input. Use 'l', 'r', 'w', or 's'.");
+    }
   }
-  // Sweep from 180 back to 0 degrees
-  for (int pos = 180; pos >= 0; pos--) {
-    myservo.write(pos);
-    delay(15);
-  }
+}
+
+void updateServo() {
+  currentAngle = minAngle + currentStep * stepAngle;
+  myServo.write(currentAngle);
+  SerialBT.print("Servo angle: ");
+  SerialBT.println(currentAngle);
+}
+
+void turnMotorOn() {
+  digitalWrite(motorPin, HIGH);
+  SerialBT.println("Motor turned ON.");
+}
+
+void turnMotorOff() {
+  digitalWrite(motorPin, LOW);
+  SerialBT.println("Motor turned OFF.");
 }
