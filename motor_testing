@@ -9,7 +9,7 @@ void loop() {
   digitalWrite(signalPin, HIGH);
   digitalWrite(powerPin, HIGH);
   delay(1000);
-  digitalWrite(signalPin, LOW);
+  digitalWrite(signalPin, HIGH);
   digitalWrite(powerPin, HIGH);
   delay(1000);
 }
