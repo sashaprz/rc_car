@@ -1,1 +1,89 @@
+#include <ESP32Servo.h>
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+
+Servo myServo;
+
+// Pin assignments
+const int steerPin = 26;    // Steering servo pin
+const int signalPin = 25;   // Motor signal pin
+const int powerPin = 27;    // Motor power pin
+
+// Servo position variables
+const int steps = 5;                   // Number of steps for full 180°
+const int minAngle = 0;
+const int maxAngle = 180;
+const int stepAngle = (maxAngle - minAngle) / steps; // 36°
+int currentStep = steps / 2;           // Start centered (step 2 of 0-5)
+int currentAngle = minAngle + currentStep * stepAngle;
+
+void setup() {
+  Serial.begin(115200);
+  myServo.attach(steerPin, 500, 2400); // Attach servo with typical pulse range
+  myServo.write(currentAngle);          // Center servo
+
+  pinMode(signalPin, OUTPUT);
+  pinMode(powerPin, OUTPUT);
+  // Ensure motor is off at start
+  digitalWrite(signalPin, LOW);
+  digitalWrite(powerPin, LOW);
+
+  SerialBT.begin("ESP32_Servo_Control");
+  SerialBT.println("Ready! 'l'/'r' = steer, 'w' = motor ON, 's' = motor OFF.");
+}
+
+void loop() {
+  if (SerialBT.available() > 0) {
+    char input = SerialBT.read();
+    switch(input) {
+      case 'l':
+      case 'L':
+        if (currentStep > 0) {
+          currentStep--;
+          updateServo();
+        } else {
+          SerialBT.println("Left limit reached! Servo at 0 degrees.");
+        }
+        break;
+      case 'r':
+      case 'R':
+        if (currentStep < steps) {
+          currentStep++;
+          updateServo();
+        } else {
+          SerialBT.println("Right limit reached! Servo at 180 degrees.");
+        }
+        break;
+      case 'w':
+      case 'W':
+        turnMotorOn();
+        break;
+      case 's':
+      case 'S':
+        turnMotorOff();
+        break;
+      default:
+        SerialBT.println("Invalid input. Use 'l', 'r', 'w', or 's'.");
+    }
+  }
+}
+
+void updateServo() {
+  currentAngle = minAngle + currentStep * stepAngle;
+  myServo.write(currentAngle);
+  SerialBT.print("Servo angle: ");
+  SerialBT.println(currentAngle);
+}
+
+void turnMotorOn() {
+  digitalWrite(signalPin, HIGH);
+  digitalWrite(powerPin, HIGH);
+  SerialBT.println("Motor turned ON.");
+}
+
+void turnMotorOff() {
+  digitalWrite(signalPin, LOW);
+  digitalWrite(powerPin, LOW);
+  SerialBT.println("Motor turned OFF.");
+}
 
